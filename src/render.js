@@ -46,7 +46,7 @@ header.site{
 nav.top a{color:var(--dim);margin-left:22px;font-size:14px}
 nav.top a:hover{color:var(--text);text-decoration:none}
 .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
-.hero{max-width:760px;margin:0 auto;text-align:center;padding:9vh 24px 0}
+.hero{max-width:760px;margin:0 auto;text-align:center;padding:3.5vh 24px 0}
 .hero .kicker{
   font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);
   margin:0 0 22px;animation:rise .9s var(--ease) both;
@@ -60,6 +60,79 @@ nav.top a:hover{color:var(--text);text-decoration:none}
   color:var(--dim);font-size:18px;line-height:1.55;max-width:560px;margin:0 auto 40px;
   animation:rise .9s var(--ease) .16s both;
 }
+/* ——— hero scene: the checkpoint ———
+   The OrbitalDesk lighthouse reworked as an inspection beacon: one orange
+   light family, fog, a slow beam over a dark sea lane. Packages drift in
+   from the dark; the beam (28s sweep) crosses vertical at 12.5/37.5/62.5/
+   87.5% of a 56s master cycle and stamps one package at the gate at each
+   crossing — Risky, Clean, Caution, then Hostile, which is held at the
+   gate and never clears. Pure inline SVG + CSS; no assets. With motion
+   reduced, the animations stop and the markup's resting pose remains:
+   beam tilted toward the incoming lane, one package stamped at the gate,
+   one already cleared beyond it. */
+.scene{
+  width:100vw;margin-left:calc(50% - 50vw);height:clamp(230px,30vw,360px);
+  margin-bottom:6px;overflow:hidden;pointer-events:none;
+  -webkit-mask-image:linear-gradient(180deg,#000 80%,transparent 99%);
+  mask-image:linear-gradient(180deg,#000 80%,transparent 99%);
+  animation:rise 1.1s var(--ease) both;
+}
+.scene svg{display:block;width:100%;height:100%}
+.scene .beam{transform-box:fill-box;transform-origin:0% 50%;animation:beamSweep 28s ease-in-out infinite}
+@keyframes beamSweep{0%{transform:rotate(-19deg)}50%{transform:rotate(19deg)}100%{transform:rotate(-19deg)}}
+.scene .halo{animation:haloBreath 7s ease-in-out infinite alternate}
+@keyframes haloBreath{from{opacity:.5}to{opacity:.85}}
+.scene .blink{animation:blink 4.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:.95}}
+.scene .tw{animation:twinkle 3.6s ease-in-out infinite}
+.scene .tw2{animation:twinkle 4.7s ease-in-out -1.8s infinite}
+@keyframes twinkle{0%,100%{opacity:.14}50%{opacity:.55}}
+.scene .fog1{animation:fogA 34s ease-in-out infinite alternate}
+.scene .fog2{animation:fogB 47s ease-in-out infinite alternate}
+@keyframes fogA{from{transform:translateX(-26px)}to{transform:translateX(26px)}}
+@keyframes fogB{from{transform:translateX(20px)}to{transform:translateX(-20px)}}
+.scene .shimmer{animation:shimmer 6s ease-in-out infinite alternate}
+@keyframes shimmer{from{opacity:.3}to{opacity:.55}}
+.scene .gatePulse{animation:gatePulse 56s linear infinite}
+@keyframes gatePulse{0%,100%{opacity:.3}10%{opacity:.32}12.5%{opacity:1}15%{opacity:.32}35%{opacity:.32}37.5%{opacity:1}40%{opacity:.32}60%{opacity:.32}62.5%{opacity:1}65%{opacity:.32}85%{opacity:.32}87.5%{opacity:1}90%{opacity:.32}}
+.scene .ember{animation:emberRise 13s linear infinite}
+.scene .ember2{animation:emberRise 17s linear -6s infinite}
+.scene .ember3{animation:emberRise 11s linear -3s infinite}
+@keyframes emberRise{0%{transform:translateY(0);opacity:0}12%{opacity:.5}70%{opacity:.22}100%{transform:translateY(-118px);opacity:0}}
+.scene .lit,.scene .stamp,.scene .ring{opacity:0}
+.scene .stamp,.scene .ring{transform-box:fill-box;transform-origin:50% 50%}
+.crateA{animation:driftA 56s linear infinite}
+.crateA .lit{animation:litA 56s linear infinite}
+.crateA .stamp{animation:stampA 56s linear infinite}
+.crateA .ring{animation:ringA 56s linear infinite}
+@keyframes driftA{0%{transform:translate(40px,300px);opacity:0}5%{opacity:.96}33%{transform:translate(872px,299px)}37.5%{transform:translate(983px,300px)}40.5%{transform:translate(998px,300px)}55%{transform:translate(1330px,301px);opacity:.96}60%{transform:translate(1490px,301px);opacity:0}100%{transform:translate(1490px,301px);opacity:0}}
+@keyframes litA{0%,34.5%{opacity:0}37.5%{opacity:.34}41.5%{opacity:0}100%{opacity:0}}
+@keyframes stampA{0%,36.3%{opacity:0;transform:scale(1.7)}37.5%{opacity:1;transform:scale(1)}55%{opacity:1}59%,100%{opacity:0}}
+@keyframes ringA{0%,37.4%{opacity:0;transform:scale(.35)}37.8%{opacity:.75}41.5%{opacity:0;transform:scale(1.6)}100%{opacity:0}}
+.crateB{animation:driftB 56s linear infinite}
+.crateB .lit{animation:litB 56s linear infinite}
+.crateB .stamp{animation:stampB 56s linear infinite}
+.crateB .ring{animation:ringB 56s linear infinite}
+@keyframes driftB{0%{transform:translate(300px,272px);opacity:0}6%{opacity:.8}58%{transform:translate(940px,271px)}62.5%{transform:translate(990px,272px)}65.5%{transform:translate(1002px,272px)}82%{transform:translate(1330px,273px);opacity:.8}88%{transform:translate(1420px,273px);opacity:0}100%{transform:translate(1420px,273px);opacity:0}}
+@keyframes litB{0%,59.5%{opacity:0}62.5%{opacity:.3}66.5%{opacity:0}100%{opacity:0}}
+@keyframes stampB{0%,61.3%{opacity:0;transform:scale(1.7)}62.5%{opacity:1;transform:scale(1)}83%{opacity:1}87%,100%{opacity:0}}
+@keyframes ringB{0%,62.4%{opacity:0;transform:scale(.35)}62.8%{opacity:.7}66.5%{opacity:0;transform:scale(1.6)}100%{opacity:0}}
+.crateC{animation:driftC 56s linear infinite}
+.crateC .lit{animation:litC 56s linear infinite}
+.crateC .stamp{animation:stampC 56s linear infinite}
+.crateC .ring{animation:ringC 56s linear infinite}
+@keyframes driftC{0%{transform:translate(-90px,300px);opacity:0}5%{opacity:.96}80%{transform:translate(872px,299px)}87.5%{transform:translate(983px,300px);opacity:.96}93%{transform:translate(990px,300px);opacity:.5}98.5%{transform:translate(990px,300px);opacity:0}100%{transform:translate(990px,300px);opacity:0}}
+@keyframes litC{0%,84.5%{opacity:0}87.5%{opacity:.36}91.5%{opacity:0}100%{opacity:0}}
+@keyframes stampC{0%,86.3%{opacity:0;transform:scale(1.7)}87.5%{opacity:1;transform:scale(1)}96%{opacity:1}98.5%,100%{opacity:0}}
+@keyframes ringC{0%,87.4%{opacity:0;transform:scale(.35)}87.8%{opacity:.8}91.5%{opacity:0;transform:scale(1.6)}100%{opacity:0}}
+.crateD{animation:driftD 56s linear infinite}
+.crateD .lit{animation:litD 56s linear infinite}
+.crateD .stamp{animation:stampD 56s linear infinite}
+.crateD .ring{animation:ringD 56s linear infinite}
+@keyframes driftD{0%{transform:translate(830px,272px);opacity:0}3%{opacity:.8}12.5%{transform:translate(990px,272px)}15.5%{transform:translate(1002px,272px)}30%{transform:translate(1330px,273px);opacity:.8}36%{transform:translate(1440px,273px);opacity:0}100%{transform:translate(1440px,273px);opacity:0}}
+@keyframes litD{0%,9.5%{opacity:0}12.5%{opacity:.32}16.5%{opacity:0}100%{opacity:0}}
+@keyframes stampD{0%,11.3%{opacity:0;transform:scale(1.7)}12.5%{opacity:1;transform:scale(1)}31%{opacity:1}35%,100%{opacity:0}}
+@keyframes ringD{0%,12.4%{opacity:0;transform:scale(.35)}12.8%{opacity:.7}16.5%{opacity:0;transform:scale(1.6)}100%{opacity:0}}
 .scanbox{
   max-width:680px;margin:0 auto;animation:rise .9s var(--ease) .24s both;
   background:linear-gradient(180deg,rgba(255,255,255,.025),transparent),var(--panel);
@@ -183,6 +256,8 @@ table.stats td:first-child{color:var(--text)}
 .pager{display:flex;gap:16px;justify-content:center;margin-top:30px}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
+  /* static composed scene: the gate package and the cleared package keep their stamps */
+  .scene .stampA,.scene .stampD{opacity:.95}
 }
 @media (max-width:640px){
   .scanbox form{flex-direction:column}
@@ -230,6 +305,139 @@ export function homePage({ origin, recent, totals, error }) {
   const body = `
 <main>
   <div class="hero">
+    <div class="scene" aria-hidden="true">
+      <svg viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice" focusable="false">
+        <defs>
+          <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#0a0908"/><stop offset="1" stop-color="#0e0b08"/>
+          </linearGradient>
+          <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#0d0b09"/><stop offset="1" stop-color="#060505"/>
+          </linearGradient>
+          <linearGradient id="beamGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#ffa64d" stop-opacity=".55"/>
+            <stop offset=".45" stop-color="#ff7a1a" stop-opacity=".2"/>
+            <stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/>
+          </linearGradient>
+          <radialGradient id="haloGrad">
+            <stop offset="0" stop-color="#ffb37a" stop-opacity=".85"/>
+            <stop offset=".4" stop-color="#ff7a1a" stop-opacity=".28"/>
+            <stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="fogGrad">
+            <stop offset="0" stop-color="#ffb37a" stop-opacity=".08"/>
+            <stop offset="1" stop-color="#ffb37a" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="reflGrad">
+            <stop offset="0" stop-color="#ff8c32" stop-opacity=".2"/>
+            <stop offset="1" stop-color="#ff8c32" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="1440" height="400" fill="url(#skyGrad)"/>
+        <g fill="#e9dec9">
+          <circle cx="90" cy="46" r=".9" opacity=".3"/><circle cx="210" cy="92" r="1.2" opacity=".22"/>
+          <circle cx="355" cy="38" r=".8" opacity=".28"/><circle cx="520" cy="70" r="1" opacity=".18"/>
+          <circle cx="655" cy="30" r=".9" opacity=".26"/><circle cx="760" cy="88" r="1.1" opacity=".2"/>
+          <circle cx="880" cy="44" r=".8" opacity=".3"/><circle cx="1120" cy="36" r="1" opacity=".24"/>
+          <circle cx="1245" cy="78" r="1.2" opacity=".2"/><circle cx="1360" cy="50" r=".9" opacity=".28"/>
+          <circle class="tw" cx="455" cy="58" r="1.1" opacity=".3"/>
+          <circle class="tw2" cx="985" cy="66" r="1.1" opacity=".3"/>
+          <circle class="tw" cx="1305" cy="120" r="1" opacity=".26"/>
+        </g>
+        <ellipse class="fog1" cx="330" cy="284" rx="360" ry="30" fill="url(#fogGrad)"/>
+        <rect y="318" width="1440" height="82" fill="url(#seaGrad)"/>
+        <line x1="0" y1="318" x2="1440" y2="318" stroke="#ffb37a" stroke-opacity=".1"/>
+        <ellipse class="shimmer" cx="1010" cy="332" rx="84" ry="8" fill="url(#reflGrad)" opacity=".45"/>
+        <g stroke="#ffb37a" stroke-width="1.4" stroke-linecap="round">
+          <line x1="905" y1="326" x2="931" y2="326" stroke-opacity=".1"/>
+          <line x1="1085" y1="334" x2="1119" y2="334" stroke-opacity=".08"/>
+          <line x1="960" y1="344" x2="980" y2="344" stroke-opacity=".07"/>
+          <line x1="700" y1="330" x2="722" y2="330" stroke-opacity=".05"/>
+          <line x1="420" y1="336" x2="446" y2="336" stroke-opacity=".05"/>
+        </g>
+        <g fill="#ffb37a">
+          <circle cx="64" cy="313" r="1.3" opacity=".35"/><circle cx="118" cy="314" r="1" opacity=".25"/>
+          <circle cx="196" cy="313" r="1.4" opacity=".3"/><circle cx="288" cy="314" r="1" opacity=".22"/>
+          <circle class="tw2" cx="340" cy="313" r="1.1" opacity=".3"/>
+          <circle cx="402" cy="313" r="1.2" opacity=".28"/><circle cx="520" cy="314" r="1" opacity=".2"/>
+          <circle cx="618" cy="313" r="1.3" opacity=".24"/>
+          <circle class="tw" cx="760" cy="338" r="1.4" opacity=".3"/>
+          <circle class="tw2" cx="1150" cy="342" r="1.2" opacity=".3"/>
+        </g>
+        <path d="M946,352 L962,318 L1058,318 L1076,352 Z" fill="#0e0b09"/>
+        <g fill="#14110d" stroke="#2a251e">
+          <path d="M982,318 L990,252 L1030,252 L1038,318 Z"/>
+          <path d="M990,252 L995,196 L1025,196 L1030,252 Z"/>
+          <path d="M995,196 L999,140 L1021,140 L1025,196 Z"/>
+          <rect x="984" y="140" width="52" height="7" rx="2"/>
+          <rect x="996" y="114" width="28" height="26" fill="#100d0a"/>
+          <path d="M992,114 L1010,96 L1028,114 Z"/>
+        </g>
+        <g fill="#ffb37a">
+          <rect x="1005" y="282" width="9" height="3.5" opacity=".45"/>
+          <rect x="1005" y="222" width="9" height="3.5" opacity=".35"/>
+          <rect class="tw2" x="1005" y="166" width="9" height="3.5" opacity=".5"/>
+        </g>
+        <line x1="992" y1="147" x2="992" y2="152" stroke="#2a251e"/>
+        <line x1="1028" y1="147" x2="1028" y2="152" stroke="#2a251e"/>
+        <line x1="1010" y1="96" x2="1010" y2="80" stroke="#2a251e"/>
+        <circle class="blink" cx="1010" cy="78" r="2" fill="#ffb37a" opacity=".6"/>
+        <circle class="halo" cx="1010" cy="125" r="34" fill="url(#haloGrad)" opacity=".65"/>
+        <rect x="1000" y="114" width="20" height="22" rx="3" fill="#ff963c" fill-opacity=".16"/>
+        <circle cx="1010" cy="125" r="6.5" fill="#ffd9a8"/>
+        <circle cx="1010" cy="125" r="3" fill="#fff3e0"/>
+        <g>
+          <path d="M940,336 L943,318 L946,336 Z" fill="#14110d"/>
+          <circle class="gatePulse" cx="943" cy="315" r="2.6" fill="#ffb37a" opacity=".3"/>
+          <path d="M1074,336 L1077,318 L1080,336 Z" fill="#14110d"/>
+          <circle class="gatePulse" cx="1077" cy="315" r="2.6" fill="#ffb37a" opacity=".3"/>
+        </g>
+        <g class="crateB" transform="translate(560,272)">
+          <rect x="0" y="6" width="40" height="20" rx="2.5" fill="#171310" stroke="#3a3226"/>
+          <rect x="0" y="6" width="40" height="5.5" fill="#1e1912" stroke="#3a3226"/>
+          <rect x="7" y="13" width="11" height="7" fill="#241d13" stroke="#3a3226" stroke-width=".6"/>
+          <rect class="lit" x="0" y="6" width="40" height="20" rx="2.5" fill="#ff9a3c"/>
+          <circle class="ring" cx="30" cy="17" r="6.8" fill="none" stroke="#d9a821" stroke-width="1.4"/>
+          <g class="stamp stampB"><circle cx="30" cy="17" r="4.6" fill="#d9a821"/><path d="M28.2,17.2 L29.7,18.7 L32.3,15.8" stroke="#0a0908" stroke-width="1.3" fill="none" stroke-linecap="round"/></g>
+        </g>
+        <g class="crateD" transform="translate(1180,272)">
+          <rect x="0" y="6" width="40" height="20" rx="2.5" fill="#171310" stroke="#3a3226"/>
+          <rect x="0" y="6" width="40" height="5.5" fill="#1e1912" stroke="#3a3226"/>
+          <rect x="7" y="13" width="11" height="7" fill="#241d13" stroke="#3a3226" stroke-width=".6"/>
+          <rect class="lit" x="0" y="6" width="40" height="20" rx="2.5" fill="#ff9a3c"/>
+          <circle class="ring" cx="30" cy="17" r="6.8" fill="none" stroke="#e06c1f" stroke-width="1.4"/>
+          <g class="stamp stampD"><circle cx="30" cy="17" r="4.6" fill="#e06c1f"/><path d="M28.2,17.2 L29.7,18.7 L32.3,15.8" stroke="#0a0908" stroke-width="1.3" fill="none" stroke-linecap="round"/></g>
+        </g>
+        <g class="crateC" transform="translate(430,300)">
+          <rect x="0" y="8" width="54" height="28" rx="3" fill="#171310" stroke="#3a3226"/>
+          <rect x="0" y="8" width="54" height="7" fill="#1e1912" stroke="#3a3226"/>
+          <rect x="9" y="19" width="15" height="10" fill="#241d13" stroke="#3a3226" stroke-width=".6"/>
+          <rect class="lit" x="0" y="8" width="54" height="28" rx="3" fill="#ff9a3c"/>
+          <circle class="ring" cx="40" cy="26" r="9" fill="none" stroke="#d23c2a" stroke-width="1.6"/>
+          <g class="stamp stampC"><circle cx="40" cy="26" r="6" fill="#d23c2a"/><path d="M37.8,23.8 L42.2,28.2 M42.2,23.8 L37.8,28.2" stroke="#0a0908" stroke-width="1.6" fill="none" stroke-linecap="round"/></g>
+        </g>
+        <g class="crateA" transform="translate(983,300)">
+          <rect x="0" y="8" width="54" height="28" rx="3" fill="#171310" stroke="#3a3226"/>
+          <rect x="0" y="8" width="54" height="7" fill="#1e1912" stroke="#3a3226"/>
+          <rect x="9" y="19" width="15" height="10" fill="#241d13" stroke="#3a3226" stroke-width=".6"/>
+          <rect class="lit" x="0" y="8" width="54" height="28" rx="3" fill="#ff9a3c"/>
+          <circle class="ring" cx="40" cy="26" r="9" fill="none" stroke="#3fb970" stroke-width="1.6"/>
+          <g class="stamp stampA"><circle cx="40" cy="26" r="6" fill="#3fb970"/><path d="M37.2,26.2 L39.2,28.2 L42.6,24.4" stroke="#0a0908" stroke-width="1.6" fill="none" stroke-linecap="round"/></g>
+        </g>
+        <g transform="translate(1010,125) rotate(90)">
+          <g class="beam" transform="rotate(-14)">
+            <path d="M0,0 L256,-30 L256,30 Z" fill="url(#beamGrad)" opacity=".5"/>
+            <path d="M0,0 L256,-12 L256,12 Z" fill="url(#beamGrad)" opacity=".6"/>
+          </g>
+        </g>
+        <ellipse class="fog2" cx="1170" cy="258" rx="330" ry="24" fill="url(#fogGrad)"/>
+        <g fill="#ffb37a">
+          <circle class="ember" cx="982" cy="302" r="1.6" opacity="0"/>
+          <circle class="ember2" cx="1044" cy="308" r="1.2" opacity="0"/>
+          <circle class="ember3" cx="1016" cy="298" r="1" opacity="0"/>
+        </g>
+      </svg>
+    </div>
     <p class="kicker">Pre-install vetting for agent skills &amp; MCP servers</p>
     <h1>Check it <span class="lit">before</span> your agent runs it.</h1>
     <p class="sub">Paste a link to a skill or MCP server. Preflight reads the code and the instructions, then shows you exactly what it touches, in plain English. Free.</p>
