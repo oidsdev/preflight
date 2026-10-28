@@ -62,6 +62,7 @@ const INFRA_DOMAINS = new Set([
   'github.com', 'api.github.com', 'raw.githubusercontent.com', 'objects.githubusercontent.com',
   'crates.io', 'index.crates.io', 'proxy.golang.org', 'sum.golang.org', 'rubygems.org',
   'fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.jsdelivr.net', 'unpkg.com',
+  'www.w3.org', 'w3.org', // XML/SVG namespace identifiers — never contacted as endpoints
 ]);
 
 function lineOf(content, idx) {
