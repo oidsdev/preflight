@@ -1,0 +1,4 @@
+node_modules/
+.wrangler/
+seed/seed-results.json
+seed/seed.log
