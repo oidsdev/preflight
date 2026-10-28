@@ -1,4 +1,5 @@
 name = "preflight"
+workers_dev = true
 main = "src/index.js"
 compatibility_date = "2026-09-27"
 
@@ -11,8 +12,6 @@ database_id = "4e1d75cc-66c8-4bac-b591-5e8fafa8e575"
 binding = "CACHE"
 id = "00d2e5570bde4408bc3eead0eedb736d"
 
-[vars]
-STATS_KEY = "d481a507eb6c803b9853beb9d53a68fe458e"
 
 
 [[routes]]

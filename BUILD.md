@@ -1,8 +1,12 @@
-# hol-guard — build record
+# Preflight — build record
 
 **Built:** 2026-10-28 (v1, free until traction — no payments, no paywall, no Oids integration, per David's shape decisions of Oct 28 05:34 ET)
-**Live:** https://hol-guard.mrdavesemailaddress.workers.dev
-**Worker version at record time:** 528b8c1a-d12c-4017-ad34-ad05d8398614 · D1 `hol-guard-db` (4e1d75cc-66c8-4bac-b591-5e8fafa8e575) · KV `CACHE` (00d2e5570bde4408bc3eead0eedb736d)
+**Renamed:** launched as "hol-guard" on Oct 28; renamed to **Preflight** the same day on David's ruling (Oct 28 06:39 ET) after the build flagged that "hol-guard" is the name of Hashgraph Online's existing product (see "Repo state" below).
+**Live:** https://preflight.orbitaldeskllc.com (custom domain, canonical) · https://preflight.mrdavesemailaddress.workers.dev (workers.dev; `workers_dev = true` is set explicitly — adding the custom-domain route silently disabled the subdomain until this was set)
+**Old address:** https://hol-guard.mrdavesemailaddress.workers.dev now serves a 301 redirect to the same path on the Preflight workers.dev host (a minimal redirect worker deployed under the old script name), so every report link shared under the old name still resolves.
+**Worker version at record time:** b0ee7b73-d5ef-445c-8e6d-32b7e415b004 (plus the STATS_KEY secret upload) · D1 `hol-guard-db` (4e1d75cc-66c8-4bac-b591-5e8fafa8e575; the database keeps its original internal name — the rename bound the same database by ID, so all 285 launch reports carried over) · KV `CACHE` (00d2e5570bde4408bc3eead0eedb736d)
+**Code home:** https://github.com/oidsdev/preflight (public, Apache-2.0). The workspace folder keeps the name `~/workspace/hol-guard-scanner/` because the weekly improvement cron references `~/workspace/hol-guard-scanner/BUILD.md` and `IMPROVEMENT-LOG.md` by path.
+**Company site:** listed as the fourth entry under "What we run" on orbitaldeskllc.com, linking to the custom domain (added Oct 28; source `~/workspace/orbitaldesk-site/index.html`, deployed via `wrangler pages deploy deploy/ --project-name orbitaldesk`).
 
 ## What it is
 
@@ -10,9 +14,9 @@ A standalone web tool that vets AI agent skills and MCP servers before install. 
 
 ## Repo state — read this first
 
-- **oidsdev/hol-guard is NOT this product's code home.** Inspected Oct 28: it is a fork (created 2026-10-27) of `hashgraph-online/hol-guard`, a large third-party runtime-guard codebase (Python/Rust approval invariants), with an "Add Oids MCP server contribution" commit. Unrelated scaffold; the scanner was built fresh here, per the brief's instruction for that case.
-- The scanner source lives in this workspace project and is committed to a **local git repo** (init Oct 28; commits 5026abf → 2814648). It has **not been pushed anywhere** — pushing into the hol-guard fork would pollute an unrelated codebase. Parent decision needed: create a fresh public repo (suggested name `oidsdev/hol-guard-scanner`) and push, or direct another home. License of this code: Apache-2.0 (package.json), matching the instruction to leave hol-guard's Apache license as is.
-- **Name collision, flagged:** "hol-guard" is also the name of Hashgraph Online's existing product (the fork's upstream). David directed the name; the collision is on the record for a rename decision if wanted.
+- **oidsdev/hol-guard is NOT this product's code home.** Inspected Oct 28: it is a fork (created 2026-10-27) of `hashgraph-online/hol-guard`, a large third-party runtime-guard codebase (Python/Rust approval invariants), with an "Add Oids MCP server contribution" commit. Unrelated scaffold; the scanner was built fresh here, per the brief's instruction for that case. The fork repo was left exactly as is during the rename.
+- The scanner source was committed to a local git repo (init Oct 28; commits 5026abf → 2814648) and, after the rename, pushed to a new public repo: **oidsdev/preflight**. License of this code: Apache-2.0 (LICENSE file + package.json).
+- **Name collision, resolved:** "hol-guard" is also the name of Hashgraph Online's existing product (the fork's upstream). David ruled a rename on Oct 28 06:39 ET and picked **Preflight**; the whole surface (pages, badge SVG and alt text, stats, sitemap, robots, fetch user-agent, repo) was rebranded and redeployed the same morning, bound to the same D1/KV stores.
 
 ## Architecture
 
@@ -63,7 +67,7 @@ Attempted **369** targets at ~1.1s pacing: 19 Honeypot skills (`github.com/oidsd
 
 ## Traction instrumentation (the free-until-traction gate)
 
-- **Stats view (internal, key-gated):** https://hol-guard.mrdavesemailaddress.workers.dev/stats?key=d481a507eb6c803b9853beb9d53a68fe458e — reports, total scans, unique scanners (daily salted hash of IP+UA), repeat scans, report views, badge fetches, badge clicks, interest signups, grade distribution, most-scanned packages. Without the key it 404s.
+- **Stats view (internal, key-gated):** https://preflight.orbitaldeskllc.com/stats?key=<STATS_KEY> (also on the workers.dev host) — reports, total scans, unique scanners (daily salted hash of IP+UA), repeat scans, report views, badge fetches, badge clicks, interest signups, grade distribution, most-scanned packages. Without the key it 404s. The key is a wrangler secret on the `preflight` worker (`wrangler secret put STATS_KEY`); it is NOT in wrangler.toml or git. The v1 key value was printed in an earlier revision of this file, which was pushed to the public repo, so the key was rotated on Oct 28; the old value now returns 404.
 - Events logged in D1: scan_new, scan_repeat, report_view, badge_fetch (with referer), badge_click, interest. Badge embeds are measurable via badge_fetch + referer; the embed snippet routes clicks through `/b/:hash` so shares are counted before redirecting to the report.
 - Interest capture on every report page: "Get alerted when a skill you use changes" — email or Oids handle + report hash into the `interest` table. No mail is sent in v1; the copy says so.
 - Launch-state honesty: counters currently include my own build-time verification traffic (2 report views, 1 badge fetch, 1 badge click). One verification interest signup was made to prove the flow and then **deleted**, so the interest list starts at 0 real rows.
@@ -71,8 +75,8 @@ Attempted **369** targets at ~1.1s pacing: 19 Honeypot skills (`github.com/oidsd
 ## What is missing, and why
 
 1. **ClawHub package contents cannot be fetched.** Verified exhaustively Oct 28: metadata and search APIs work; the version endpoint lists files with sha256 hashes but serves no contents; the documented `/api/v1/skills/{slug}/download` route 404s on clawhub.ai and api.clawhub.ai, current and versioned forms alike; the web page renders HTML (line-cited evidence can't be built from rendered HTML). ClawHub scans therefore fail with a precise error naming the skill and version and offering the workaround (paste the SKILL.md, or scan the source repo). Home-page copy states this plainly. If ClawHub restores downloads, `resolveClawhub` lights up unchanged.
-2. **Custom domain not attached.** `hol-guard.orbitaldeskllc.com` was attempted via a Workers custom-domain route: the deploy succeeded but the domain never registered (Workers Domains API lists no such domain under the current deploy token) and the hostname serves SSL errors. The route was removed; the live URL is the workers.dev subdomain above. Attaching the domain later is a one-line config change plus a token/dashboard step with Workers Domains permission. (A dangling DNS record for the hostname may exist in the zone.)
-3. **Repo not pushed** — see "Repo state" above; needs the parent's call on a repo home.
+2. **Custom domain: attached after the rename.** The hol-guard subdomain attempt failed during the v1 build: the route deployed but the domain never registered under the deploy token and the hostname served SSL errors. Retried as `preflight.orbitaldeskllc.com` on Oct 28 — it registered (visible in the Workers Domains API) and serves. Trap found on the way: adding the `[[routes]]` custom-domain block silently disabled the workers.dev subdomain (every path 404) until `workers_dev = true` was set explicitly in wrangler.toml; both hosts verified serving after the fix. (A dangling DNS record for the old hol-guard hostname may exist in the zone.)
+3. **Repo: pushed.** See "Repo state" above; the code home is oidsdev/preflight.
 4. **Scope limits by design in v1:** repos whose codeload archive exceeds 12MB compressed can't be scanned; monorepo scans scope to a single skill folder when one is identifiable, else the repo root (≤80 highest-priority text files); binary files are counted, never parsed; ClawHub metadata provenance (downloads/stars) is captured only when a scan succeeds via another route.
 
 ## Fences observed
