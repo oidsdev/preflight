@@ -47,8 +47,8 @@ const INJECTION = [
   { id: 'C3', sev: 'critical', re: /(send|upload|post|forward|transmit|exfiltrate)\b[^.\n]{0,90}(credential|password|secret|token|api[ _-]?key|private key|\.ssh|file contents|conversation history)/i, msg: 'Instructions direct the agent to send credentials, secrets, or file contents out' },
   { id: 'C3', sev: 'critical', re: /(credential|password|secret|token|api[ _-]?key)[^.\n]{0,70}\bto\b[^.\n]{0,50}(https?:\/\/|webhook|endpoint|server|address)/i, msg: 'Instructions direct credentials or secrets to an external destination' },
   { id: 'C4', sev: 'critical', re: /(do not|don't|never)\s+(tell|inform|notify|mention|reveal|alert)\b[^.\n]{0,45}(the\s+)?(user|owner|human|operator)/i, msg: 'Instructions tell the agent to keep actions secret from the user' },
-  { id: 'C4', sev: 'critical', re: /(without|before)\s+(telling|informing|notifying|asking)\s+(the\s+)?(user|owner|human)/i, msg: 'Instructions tell the agent to act without telling the user' },
-  { id: 'C4', sev: 'critical', re: /(hide|conceal|keep secret)\b[^.\n]{0,45}(from\s+the\s+user|your\s+actions|this\s+action|activity)/i, msg: 'Instructions tell the agent to hide activity from the user' },
+  { id: 'C4', sev: 'critical', re: /(without|before)\s+(telling|informing|notifying)\s+(the\s+)?(user|owner|human)/i, msg: 'Instructions tell the agent to act without telling the user' },
+  { id: 'C4', sev: 'critical', re: /(hide|conceal|keep secret)\b[^.\n]{0,45}(from\s+the\s+user|your\s+actions|this\s+action|your\s+activity|the\s+agent'?s\s+actions)/i, msg: 'Instructions tell the agent to hide activity from the user' },
   { id: 'H4', sev: 'high', re: /ignore\s+(all\s+)?(previous|prior|above|earlier)\s+(instructions|prompts|rules|directions)/i, msg: 'Prompt-injection pattern: ignore previous instructions' },
   { id: 'H4', sev: 'high', re: /disregard\s+(your\s+)?(instructions|rules|guidelines|safety)/i, msg: 'Prompt-injection pattern: disregard your instructions' },
   { id: 'H4', sev: 'high', re: /(this is|here is)\s+(your\s+)?(new|updated|real)\s+system\s+(prompt|instructions)/i, msg: 'Prompt-injection pattern: replacement system prompt' },
@@ -155,10 +155,20 @@ export function analyzePackage(files, meta = {}) {
         const idx = c.search(/process\.env|os\.environ|os\.getenv|Deno\.env/);
         if (idx >= 0) add('L1', 'low', 'credentials', f.path, lineOf(c, idx), snippet(c, idx), 'Reads named environment variables (normal for API keys; listed in the permission summary)');
       }
-      // remote eval
-      if (code && RE.remoteEval.test(c) && hasNet) {
-        const idx = c.search(RE.remoteEval);
-        add('H3', 'high', 'execution', f.path, lineOf(c, idx), snippet(c, idx), 'Evaluates code while also making network calls — check nothing remote is being executed');
+      // remote eval — bare eval()/new Function only. Method calls like
+      // page.evaluate() / helper.eval() and eval method *definitions* are
+      // browser-automation plumbing (CDP clients), not remote code execution.
+      if (code && hasNet) {
+        const reEval = /(?<![.\w$])eval\(|new Function\(/g;
+        let em, hit = -1;
+        while ((em = reEval.exec(c)) !== null) {
+          const ls = c.lastIndexOf('\n', em.index) + 1;
+          const le = c.indexOf('\n', em.index);
+          const lineText = c.slice(ls, le < 0 ? c.length : le);
+          if (/^\s*(async\s+)?eval\s*\(/.test(lineText)) continue; // method definition
+          hit = em.index; break;
+        }
+        if (hit >= 0) add('H3', 'high', 'execution', f.path, lineOf(c, hit), snippet(c, hit), 'Evaluates code while also making network calls — check nothing remote is being executed');
       }
       // shell execution from code
       if (code && RE.shellExec.test(c)) {

@@ -178,8 +178,21 @@ async function resolveGithub(env, owner, repo, { ref = null, subpath = '', skill
     if (entries.some((e) => e.path === clean || e.path.startsWith(clean + '/'))) scope = clean;
   }
   if (!scope && skillName) {
-    const dirs = skillDirs(entries).filter((d) => d.split('/').pop() === skillName);
-    if (dirs.length) scope = dirs[0];
+    const dirs = skillDirs(entries);
+    const exact = dirs.filter((d) => d.split('/').pop() === skillName);
+    const partial = dirs.filter((d) => { const p = d.split('/').pop(); return p.includes(skillName) || skillName.includes(p); });
+    // Last resort: match the name declared in a SKILL.md frontmatter.
+    let byFrontmatter = [];
+    if (!exact.length && !partial.length) {
+      for (const d of dirs) {
+        const e = entries.find((x) => x.path === (d ? d + '/SKILL.md' : 'SKILL.md'));
+        if (!e) continue;
+        const head = new TextDecoder('utf-8', { fatal: false }).decode(e.data.subarray(0, 600));
+        const nm = head.match(/^name:\s*["']?(.+?)["']?\s*$/m);
+        if (nm && nm[1].trim() === skillName) byFrontmatter.push(d);
+      }
+    }
+    scope = (exact[0] || partial[0] || byFrontmatter[0]) || '';
   }
   if (!scope) {
     const dirs = skillDirs(entries);
