@@ -208,12 +208,12 @@ ${canonical ? `<link rel="canonical" href="${esc(canonical)}">` : ''}
 </head>
 <body>
 <header class="site">
-  <a class="wordmark" href="/">hol<b>-</b>guard</a>
+  <a class="wordmark" href="/">pre<b>flight</b></a>
   <nav class="top"><a href="/reports">Reports</a><a href="/#how">How it works</a></nav>
 </header>
 ${body}
 <footer class="site">
-  <span>hol-guard is run by Orbital Desk LLC. Scans are static analysis only. Nothing you submit is ever executed.</span>
+  <span>Preflight is run by Orbital Desk LLC. Scans are static analysis only. Nothing you submit is ever executed.</span>
   <span><a href="/reports">All reports</a></span>
 </footer>
 </body>
@@ -232,7 +232,7 @@ export function homePage({ origin, recent, totals, error }) {
   <div class="hero">
     <p class="kicker">Pre-install vetting for agent skills &amp; MCP servers</p>
     <h1>Check it <span class="lit">before</span> your agent runs it.</h1>
-    <p class="sub">Paste a link to a skill or MCP server. hol-guard reads the code and the instructions, then shows you exactly what it touches, in plain English. Free.</p>
+    <p class="sub">Paste a link to a skill or MCP server. Preflight reads the code and the instructions, then shows you exactly what it touches, in plain English. Free.</p>
     <div class="scanbox">
       <form method="post" action="/api/scan">
         <input type="url" name="url" required placeholder="https://github.com/owner/repo — or a skills.sh, ClawHub link">
@@ -267,7 +267,7 @@ export function homePage({ origin, recent, totals, error }) {
   </section>` : ''}
 </main>`;
   return layout({
-    title: 'hol-guard — check an agent skill or MCP server before you install it',
+    title: 'Preflight — check an agent skill or MCP server before you install it',
     desc: 'Free pre-install safety scanner for AI agent skills and MCP servers. Static analysis with cited evidence: credentials, exfiltration, shell execution, prompt injection.',
     body, canonical: origin + '/',
   });
@@ -296,7 +296,7 @@ export function reportPage({ origin, row, report, known }) {
   const a = report.analysis;
   const url = origin + '/r/' + row.hash;
   const pass = row.grade === 'Clean' || row.grade === 'Caution';
-  const badgeMd = `[![hol-guard: ${row.grade}](${origin}/badge/${row.hash}.svg)](${origin}/b/${row.hash})`;
+  const badgeMd = `[![Preflight: ${row.grade}](${origin}/badge/${row.hash}.svg)](${origin}/b/${row.hash})`;
   const findings = a.findings.length ? a.findings.map((f) => `
     <div class="finding">
       <div class="top"><span class="sev ${esc(f.severity)}">${esc(f.severity)}</span><span class="msg">${esc(f.message)}</span></div>
@@ -342,7 +342,7 @@ export function reportPage({ origin, row, report, known }) {
   <div class="panel"><h2>Provenance</h2><dl class="kv">${provRows(report.provenance)}</dl></div>
 
   ${pass ? `<div class="panel"><h2>Badge for the author</h2>
-    <p style="margin:0 0 12px"><img alt="hol-guard grade" src="/badge/${esc(row.hash)}.svg"></p>
+    <p style="margin:0 0 12px"><img alt="Preflight grade" src="/badge/${esc(row.hash)}.svg"></p>
     <div class="embedbox">${esc(badgeMd)}</div>
     <p class="note">The badge links back to this report and updates if the package is re-scanned at a new version.</p></div>` : ''}
 
@@ -357,8 +357,8 @@ export function reportPage({ origin, row, report, known }) {
   </div>
 </main>`;
   return layout({
-    title: `${report.name || row.pkg_key} — ${row.grade} (${row.score}/100) · hol-guard`,
-    desc: `hol-guard scan of ${report.name || row.pkg_key}: graded ${row.grade} with cited findings on credentials, exfiltration, shell execution, and prompt injection.`,
+    title: `${report.name || row.pkg_key} — ${row.grade} (${row.score}/100) · Preflight`,
+    desc: `Preflight scan of ${report.name || row.pkg_key}: graded ${row.grade} with cited findings on credentials, exfiltration, shell execution, and prompt injection.`,
     body, canonical: url,
   });
 }
@@ -378,18 +378,18 @@ export function browsePage({ reports, page, hasNext }) {
       ${page > 1 ? `<a href="/reports?page=${page - 1}">← Newer</a>` : ''}
       ${hasNext ? `<a href="/reports?page=${page + 1}">Older →</a>` : ''}
     </div></div></main>`;
-  return layout({ title: 'Reports · hol-guard', desc: 'Public hol-guard scan reports for agent skills and MCP servers.', body });
+  return layout({ title: 'Reports · Preflight', desc: 'Public Preflight scan reports for agent skills and MCP servers.', body });
 }
 
 export function badgeSvg(grade, score) {
   const color = GRADE_COLORS[grade] || '#888';
-  const label = 'hol-guard';
+  const label = 'Preflight';
   const value = grade + ' ' + score;
   const w1 = Math.round(label.length * 6.6 + 14);
   const w2 = Math.round(value.length * 6.6 + 14);
   const w = w1 + w2;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="20" role="img" aria-label="hol-guard: ${value}">
-<title>hol-guard: ${value}</title>
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="20" role="img" aria-label="Preflight: ${value}">
+<title>Preflight: ${value}</title>
 <linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-opacity=".08"/></linearGradient>
 <clipPath id="r"><rect width="${w}" height="20" rx="3" fill="#fff"/></clipPath>
 <g clip-path="url(#r)"><rect width="${w1}" height="20" fill="#17140f"/><rect x="${w1}" width="${w2}" height="20" fill="${color}"/><rect width="${w}" height="20" fill="url(#s)"/></g>
@@ -402,7 +402,7 @@ export function statsPage(d) {
   const evRows = Object.entries(d.eventsByKind).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${v}</td></tr>`).join('');
   const gradeRows = Object.entries(d.grades).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${v}</td></tr>`).join('');
   const body = `<main><div class="wrap" style="padding-top:5vh;max-width:820px">
-    <h1 style="font-size:30px">hol-guard stats (internal)</h1>
+    <h1 style="font-size:30px">Preflight stats (internal)</h1>
     <div class="panel" style="margin-top:20px"><h2>Traction</h2>
     <dl class="kv">
       <dt>Reports</dt><dd>${d.reports}</dd>
@@ -418,9 +418,9 @@ export function statsPage(d) {
     <div class="panel"><h2>Grades</h2><table class="stats">${gradeRows}</table></div>
     <div class="panel"><h2>Most scanned</h2><table class="stats"><tr><th>Package</th><th>Grade</th><th>Scans</th><th>Views</th></tr>${topRows}</table></div>
   </div></main>`;
-  return layout({ title: 'Stats · hol-guard', desc: 'Internal stats.', body });
+  return layout({ title: 'Stats · Preflight', desc: 'Internal stats.', body });
 }
 
 export function messagePage(title, msg) {
-  return layout({ title: title + ' · hol-guard', desc: msg, body: `<main><div class="hero"><h1 style="font-size:38px">${esc(title)}</h1><p class="sub">${esc(msg)}</p><p><a class="btn" href="/" style="display:inline-block">Back to the scanner</a></p></div></main>` });
+  return layout({ title: title + ' · Preflight', desc: msg, body: `<main><div class="hero"><h1 style="font-size:38px">${esc(title)}</h1><p class="sub">${esc(msg)}</p><p><a class="btn" href="/" style="display:inline-block">Back to the scanner</a></p></div></main>` });
 }

@@ -1,4 +1,4 @@
-// Seed corpus builder for hol-guard.
+// Seed corpus builder for Preflight.
 // Sources, all data we already hold or public listings:
 //   1. Honeypot index (~/workspace/honeypot/api/skills.json) — 19 skills.
 //   2. skills.sh homepage leaderboard — (owner, repo, skill) triples.
@@ -10,7 +10,7 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 
-const BASE = 'https://hol-guard.mrdavesemailaddress.workers.dev';
+const BASE = 'https://preflight.mrdavesemailaddress.workers.dev';
 const STATS_KEY = 'd481a507eb6c803b9853beb9d53a68fe458e';
 const RESULTS = new URL('./seed-results.json', import.meta.url).pathname;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

@@ -1,4 +1,4 @@
-name = "hol-guard"
+name = "preflight"
 main = "src/index.js"
 compatibility_date = "2026-09-27"
 
@@ -14,3 +14,7 @@ id = "00d2e5570bde4408bc3eead0eedb736d"
 [vars]
 STATS_KEY = "d481a507eb6c803b9853beb9d53a68fe458e"
 
+
+[[routes]]
+pattern = "preflight.orbitaldeskllc.com"
+custom_domain = true

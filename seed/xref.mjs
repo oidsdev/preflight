@@ -5,7 +5,7 @@
 
 import { readFileSync, readdirSync } from 'node:fs';
 
-const BASE = 'https://hol-guard.mrdavesemailaddress.workers.dev';
+const BASE = 'https://preflight.mrdavesemailaddress.workers.dev';
 const STATS_KEY = 'd481a507eb6c803b9853beb9d53a68fe458e';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

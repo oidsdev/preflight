@@ -1,4 +1,4 @@
-// hol-guard — free pre-install vetting for AI agent skills and MCP servers.
+// Preflight — free pre-install vetting for AI agent skills and MCP servers.
 // Single Worker: scan API, public report pages, author badges, interest
 // capture, and an internal stats view. Static analysis only; scanned code is
 // never executed.
@@ -159,7 +159,7 @@ export default {
       if (path === '/robots.txt') {
         return new Response(`User-agent: *\nAllow: /\nSitemap: ${url.origin}/sitemap.xml\n`, { headers: { 'content-type': 'text/plain; charset=utf-8' } });
       }
-      if (path === '/health') return json({ ok: true, service: 'hol-guard' });
+      if (path === '/health') return json({ ok: true, service: 'preflight' });
       if (path === '/stats' && req.method === 'GET') {
         if (!env.STATS_KEY || url.searchParams.get('key') !== env.STATS_KEY) return new Response('not found', { status: 404 });
         const one = async (sql) => (await env.DB.prepare(sql).first()) || {};
@@ -193,7 +193,7 @@ export default {
         for (let i = 0; i < stmts.length; i += 100) await env.DB.batch(stmts.slice(i, i + 100));
         return json({ ok: true, upserted: stmts.length });
       }
-      return new Response(messagePage('Not here', 'That page does not exist on hol-guard.'), { status: 404, headers: HTML_H });
+      return new Response(messagePage('Not here', 'That page does not exist on Preflight.'), { status: 404, headers: HTML_H });
     } catch (e) {
       return new Response(messagePage('Something broke', 'The scan hit an error: ' + esc(e.message || 'unknown')), { status: 500, headers: HTML_H });
     }

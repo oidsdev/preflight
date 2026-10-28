@@ -42,7 +42,7 @@ export async function fetchCapped(rawUrl, { maxBytes = MAX_ZIP, timeoutMs = TIME
     const timer = setTimeout(() => ctrl.abort(), timeoutMs);
     let res;
     try {
-      res = await fetch(url, { redirect: 'manual', signal: ctrl.signal, headers: { 'User-Agent': 'hol-guard-scanner/1.0 (+https://hol-guard.orbitaldeskllc.com)', ...headers } });
+      res = await fetch(url, { redirect: 'manual', signal: ctrl.signal, headers: { 'User-Agent': 'preflight-scanner/1.0 (+https://preflight.mrdavesemailaddress.workers.dev)', ...headers } });
     } catch (e) {
       clearTimeout(timer);
       throw new Error('Fetch failed for ' + new URL(url).hostname + (e.name === 'AbortError' ? ' (timed out)' : '') + '.');

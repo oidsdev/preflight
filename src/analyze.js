@@ -1,4 +1,4 @@
-// hol-guard static analysis engine.
+// Preflight static analysis engine.
 // Pure functions over text files. Every finding cites file + line + the
 // matched text. No finding is ever produced from a score or a vibe:
 // a named pattern in a named file is the only evidence we report.

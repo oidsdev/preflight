@@ -6,7 +6,7 @@
 
 import { readFileSync } from 'node:fs';
 
-const BASE = 'https://hol-guard.mrdavesemailaddress.workers.dev';
+const BASE = 'https://preflight.mrdavesemailaddress.workers.dev';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const results = JSON.parse(readFileSync(new URL('./seed-results.json', import.meta.url), 'utf8'));

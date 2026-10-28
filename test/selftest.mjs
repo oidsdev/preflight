@@ -1,4 +1,4 @@
-// hol-guard self-test corpus.
+// Preflight self-test corpus.
 // Clean fixtures are modeled on ordinary, well-behaved skills and must grade
 // Clean. The hostile fixture is SYNTHETIC — written for this test only, never
 // shipped anywhere — and must grade Hostile. Also covers the zip reader and
