@@ -14,4 +14,3 @@ id = "00d2e5570bde4408bc3eead0eedb736d"
 [vars]
 STATS_KEY = "d481a507eb6c803b9853beb9d53a68fe458e"
 
-routes = [{ pattern = "hol-guard.orbitaldeskllc.com", custom_domain = true }]
