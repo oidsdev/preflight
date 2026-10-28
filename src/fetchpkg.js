@@ -222,7 +222,19 @@ async function resolveClawhub(env, slug, sourceUrl) {
     const { bytes } = await fetchCapped('https://clawhub.ai/api/v1/skills/' + encodeURIComponent(slug), { maxBytes: 256 * 1024, headers: { Accept: 'application/json' } });
     meta = JSON.parse(new TextDecoder().decode(bytes));
   } catch { /* metadata is optional; the download is the package */ }
-  const { bytes } = await fetchCapped('https://clawhub.ai/api/v1/skills/' + encodeURIComponent(slug) + '/download', { maxBytes: MAX_ZIP });
+  let bytes;
+  try {
+    ({ bytes } = await fetchCapped('https://clawhub.ai/api/v1/skills/' + encodeURIComponent(slug) + '/download', { maxBytes: MAX_ZIP }));
+  } catch {
+    // Verified 2026-10-28: ClawHub's public API serves metadata and a file
+    // list (names + sha256) but no package download and no file contents —
+    // /download 404s on clawhub.ai and api.clawhub.ai, current and
+    // versioned routes alike. Fail honestly with the workaround.
+    const s0 = (meta && (meta.skill || meta)) || {};
+    const label = s0.displayName || s0.name || slug;
+    const ver = s0.latestVersion || (meta && meta.latestVersion && meta.latestVersion.version) || null;
+    throw new Error('ClawHub lists "' + label + '"' + (ver ? ' (v' + ver + ')' : '') + ' but does not serve package downloads through its public API, so there is nothing for us to read. Paste the SKILL.md below instead, or scan the source repository URL.');
+  }
   const entries = stripCommonRoot(await unzip(bytes, { maxTotalBytes: 64 * 1024 * 1024 }));
   const dirs = skillDirs(entries);
   const scope = dirs.length === 1 ? dirs[0] : '';

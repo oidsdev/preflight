@@ -240,7 +240,7 @@ export function homePage({ origin, recent, totals, error }) {
       </form>
     </div>
     ${error ? `<div class="err">${esc(error)}</div>` : ''}
-    <p class="sources">Works with <code>github.com</code> repos, <code>skills.sh</code> listings, <code>clawhub.ai</code> skills, and direct <code>.zip</code> archives.</p>
+    <p class="sources">Works with <code>github.com</code> repos, <code>skills.sh</code> listings, and direct <code>.zip</code> archives. For a ClawHub skill, scan its source repo or paste the SKILL.md — ClawHub's API does not serve package downloads.</p>
     <details class="paste">
       <summary>No link? Paste a SKILL.md instead</summary>
       <form method="post" action="/api/scan">
