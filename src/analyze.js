@@ -43,9 +43,15 @@ const RE = {
   homePath: /homedir\(\)|expanduser\(|~\/\.(config|local|cache)|%USERPROFILE%|\$HOME/,
 };
 
+// C3 is procedural (see the prose block in analyzePackage): the naive regex
+// version fired on ordinary API documentation ("POST /auth/token", "the
+// secret is exchanged via POST ... for a short-lived token") — the exact
+// cry-wolf failure this product cannot afford. The malicious shape is an
+// instruction to send THE USER'S secrets OUT to an external destination, so
+// a critical requires a transfer verb + a credential noun + (a possessive
+// "user's/their" OR an external URL/webhook destination) in the same span,
+// and never matches HTTP-method documentation forms.
 const INJECTION = [
-  { id: 'C3', sev: 'critical', re: /(send|upload|post|forward|transmit|exfiltrate)\b[^.\n]{0,90}(credential|password|secret|token|api[ _-]?key|private key|\.ssh|file contents|conversation history)/i, msg: 'Instructions direct the agent to send credentials, secrets, or file contents out' },
-  { id: 'C3', sev: 'critical', re: /(credential|password|secret|token|api[ _-]?key)[^.\n]{0,70}\bto\b[^.\n]{0,50}(https?:\/\/|webhook|endpoint|server|address)/i, msg: 'Instructions direct credentials or secrets to an external destination' },
   { id: 'C4', sev: 'critical', re: /(do not|don't|never)\s+(tell|inform|notify|mention|reveal|alert)\b[^.\n]{0,45}(the\s+)?(user|owner|human|operator)/i, msg: 'Instructions tell the agent to keep actions secret from the user' },
   { id: 'C4', sev: 'critical', re: /(without|before)\s+(telling|informing|notifying)\s+(the\s+)?(user|owner|human)/i, msg: 'Instructions tell the agent to act without telling the user' },
   { id: 'C4', sev: 'critical', re: /(hide|conceal|keep secret)\b[^.\n]{0,45}(from\s+the\s+user|your\s+actions|this\s+action|your\s+activity|the\s+agent'?s\s+actions)/i, msg: 'Instructions tell the agent to hide activity from the user' },
@@ -210,6 +216,38 @@ export function analyzePackage(files, meta = {}) {
       for (const rule of INJECTION) {
         const idx = c.search(rule.re);
         if (idx >= 0) add(rule.id, rule.sev, 'injection', f.path, lineOf(c, idx), snippet(c, idx), rule.msg);
+      }
+      // C3 (procedural): instruction to send the user's secrets out.
+      {
+        const nounRe = /(credential|password|secret|token|api[ _-]?key|private key|\.ssh|file contents|conversation history)/i;
+        const verbRe = /\b(send|upload|forward|transmit|exfiltrate|post|share)\b/gi;
+        let vm, fired = false;
+        while (!fired && (vm = verbRe.exec(c)) !== null) {
+          const idx = vm.index;
+          if (idx > 0 && c[idx - 1] === '-') continue; // hyphenated compound (fast-forward)
+          const raw = vm[0];
+          const after = c.slice(idx + raw.length, idx + raw.length + 6);
+          if (raw === 'POST' && /^\s+`?\//.test(after)) continue; // HTTP method documentation: POST /path
+          if (raw === 'post' && c[idx - 1] === '`') continue; // `post` as a code identifier
+          const win = c.slice(idx, idx + 130).split(/[.\n]/)[0];
+          if (!nounRe.test(win)) continue;
+          if (/(user'?s|their|the user)\b/i.test(win) || /https?:\/\/|webhook/i.test(win)) {
+            add('C3', 'critical', 'injection', f.path, lineOf(c, idx), snippet(c, idx), 'Instructions direct the agent to send credentials, secrets, or file contents out');
+            fired = true;
+          }
+        }
+        if (!fired) {
+          // noun-first shape: "…api keys to https://…"
+          const nounFirst = new RegExp(nounRe.source, 'gi');
+          let nm;
+          while ((nm = nounFirst.exec(c)) !== null) {
+            const win = c.slice(nm.index, nm.index + 110).split(/[.\n]/)[0];
+            if (/\bto\b[^.\n]{0,50}https?:\/\//i.test(win)) {
+              add('C3', 'critical', 'injection', f.path, lineOf(c, nm.index), snippet(c, nm.index), 'Instructions direct credentials or secrets to an external destination');
+              break;
+            }
+          }
+        }
       }
       const dp = c.search(RE.downloadPipe);
       if (dp >= 0) add('C1', 'critical', 'execution', f.path, lineOf(c, dp), snippet(c, dp), 'Instructions tell the agent to pipe a remote download straight into a shell');

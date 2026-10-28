@@ -182,14 +182,16 @@ export default {
         if (!env.STATS_KEY || url.searchParams.get('key') !== env.STATS_KEY) return json({ error: 'unauthorized' }, 401);
         const j = await req.json().catch(() => ({}));
         const items = Array.isArray(j.items) ? j.items.slice(0, 5000) : [];
-        let n = 0;
+        const SQL = 'INSERT INTO known_packages (pkg_key, in_honeypot, in_census, installs, label) VALUES (?, ?, ?, ?, ?) ON CONFLICT(pkg_key) DO UPDATE SET in_honeypot = MAX(in_honeypot, excluded.in_honeypot), in_census = MAX(in_census, excluded.in_census), installs = COALESCE(excluded.installs, installs), label = COALESCE(excluded.label, label)';
+        const stmts = [];
         for (const it of items) {
           if (!it.pkg_key) continue;
-          await env.DB.prepare('INSERT INTO known_packages (pkg_key, in_honeypot, in_census, installs, label) VALUES (?, ?, ?, ?, ?) ON CONFLICT(pkg_key) DO UPDATE SET in_honeypot = MAX(in_honeypot, excluded.in_honeypot), in_census = MAX(in_census, excluded.in_census), installs = COALESCE(excluded.installs, installs), label = COALESCE(excluded.label, label)')
-            .bind(String(it.pkg_key), it.in_honeypot ? 1 : 0, it.in_census ? 1 : 0, it.installs ?? null, it.label ?? null).run();
-          n++;
+          stmts.push(env.DB.prepare(SQL).bind(String(it.pkg_key), it.in_honeypot ? 1 : 0, it.in_census ? 1 : 0, it.installs ?? null, it.label ?? null));
         }
-        return json({ ok: true, upserted: n });
+        // D1 batch: one round trip per 100 statements (sequential .run()
+        // calls made bulk uploads take ~0.4s per entry — hours for 13k rows).
+        for (let i = 0; i < stmts.length; i += 100) await env.DB.batch(stmts.slice(i, i + 100));
+        return json({ ok: true, upserted: stmts.length });
       }
       return new Response(messagePage('Not here', 'That page does not exist on hol-guard.'), { status: 404, headers: HTML_H });
     } catch (e) {
