@@ -59,14 +59,8 @@ for (const r of repoList) xref.push({ pkg_key: `github:${r}@.`, in_census: 1 });
 
 console.log(`targets: ${targets.length} (honeypot ${hpSkills.length}, skills.sh ${Math.min(110, triples.length)}, census ${censusPick.length}); xref entries: ${xref.length}`);
 
-// ---------- upload cross-reference ----------
-for (let i = 0; i < xref.length; i += 4000) {
-  const chunk = xref.slice(i, i + 4000);
-  const res = await fetch(`${BASE}/api/seed-xref?key=${STATS_KEY}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ items: chunk }) });
-  console.log('xref chunk', i, '->', res.status);
-}
-
-// ---------- scan ----------
+// ---------- scan (first: the xref upload below is slow in v1 — one D1
+// upsert per entry through the worker — so it runs after the scans) ----------
 const done = existsSync(RESULTS) ? JSON.parse(readFileSync(RESULTS, 'utf8')) : [];
 const doneUrls = new Set(done.map((d) => d.url));
 let ok = 0, failed = 0;
@@ -88,4 +82,12 @@ for (const t of targets) {
 }
 const grades = {};
 for (const d of done) if (d.ok) grades[d.grade] = (grades[d.grade] || 0) + 1;
-console.log(`SEED DONE: ${done.filter((d) => d.ok).length} ok / ${done.length} attempted; grades ${JSON.stringify(grades)}`);
+console.log(`SEED SCANS DONE: ${done.filter((d) => d.ok).length} ok / ${done.length} attempted; grades ${JSON.stringify(grades)}`);
+
+// ---------- upload cross-reference (after scans; slow in v1) ----------
+for (let i = 0; i < xref.length; i += 4000) {
+  const chunk = xref.slice(i, i + 4000);
+  const res = await fetch(`${BASE}/api/seed-xref?key=${STATS_KEY}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ items: chunk }) });
+  console.log('xref chunk', i, '->', res.status);
+}
+console.log('SEED ALL DONE');
