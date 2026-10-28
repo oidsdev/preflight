@@ -52,7 +52,12 @@ const RE = {
 // "user's/their" OR an external URL/webhook destination) in the same span,
 // and never matches HTTP-method documentation forms.
 const INJECTION = [
-  { id: 'C4', sev: 'critical', re: /(do not|don't|never)\s+(tell|inform|notify|mention|reveal|alert)\b[^.\n]{0,45}(the\s+)?(user|owner|human|operator)/i, msg: 'Instructions tell the agent to keep actions secret from the user' },
+  // The person must be the verb's recipient (directly, or via "to the user"
+  // within a few words). A loose 45-char bridge matched benign text like
+  // "the tools don't reveal why an operator [a TouchDesigner node] is
+  // expensive" — a cry-wolf critical. Calibration 5.
+  { id: 'C4', sev: 'critical', re: /(do not|don't|never)\s+(tell|inform|notify|mention|reveal|alert)\s+(the\s+)?(user|owner|human)\b/i, msg: 'Instructions tell the agent to keep actions secret from the user' },
+  { id: 'C4', sev: 'critical', re: /(do not|don't|never)\s+(tell|inform|notify|mention|reveal|alert)\b[^.\n]{0,24}\bto\s+(the\s+)?(user|owner|human)\b/i, msg: 'Instructions tell the agent to keep actions secret from the user' },
   { id: 'C4', sev: 'critical', re: /(without|before)\s+(telling|informing|notifying)\s+(the\s+)?(user|owner|human)/i, msg: 'Instructions tell the agent to act without telling the user' },
   { id: 'C4', sev: 'critical', re: /(hide|conceal|keep secret)\b[^.\n]{0,45}(from\s+the\s+user|your\s+actions|this\s+action|your\s+activity|the\s+agent'?s\s+actions)/i, msg: 'Instructions tell the agent to hide activity from the user' },
   { id: 'H4', sev: 'high', re: /ignore\s+(all\s+)?(previous|prior|above|earlier)\s+(instructions|prompts|rules|directions)/i, msg: 'Prompt-injection pattern: ignore previous instructions' },
@@ -225,6 +230,9 @@ export function analyzePackage(files, meta = {}) {
         while (!fired && (vm = verbRe.exec(c)) !== null) {
           const idx = vm.index;
           if (idx > 0 && c[idx - 1] === '-') continue; // hyphenated compound (fast-forward)
+          // Negated guidance is the opposite of an exfiltration instruction:
+          // "callers never share credentials" must not fire. Calibration 5.
+          if (/(never|not|n't|no|never\s+ever)\s+(\w+\s+){0,2}$/i.test(c.slice(Math.max(0, idx - 42), idx))) continue;
           const raw = vm[0];
           const after = c.slice(idx + raw.length, idx + raw.length + 6);
           if (raw === 'POST' && /^\s+`?\//.test(after)) continue; // HTTP method documentation: POST /path
